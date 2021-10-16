@@ -1,0 +1,14 @@
+.c-autocomplete {
+  width: 100vw;
+  max-width: 30rem;
+  margin-top: 3.1rem;
+  &__results {
+    margin-top: 1rem;
+  }
+  &__suggestion {
+    &--active {
+      font-weight: 600;
+    }
+  }
+}
+

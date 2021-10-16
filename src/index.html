@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"></head>
-  <body>
-  <div>
-    <div class="c-autocomplete" data-autocomplete>
-      <input type="text" />
-      <ul data-autocomplete-suggestions></ul>
+<head>
+  <meta charset="utf-8">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<main class="c-flight-info">
+  <div class="c-flight-info__selector c-autocomplete" data-component="rw-autocomplete-element">
+    <div class="rw-input" data-component="rw-input-element" data-realtime="true">
+      <label for="autocomplete-1" class="rw-input-label">Search flights</label>
+      <input id="autocomplete-1" placeholder="Input at least 3 characters to find your airport" class="rw-input-text"
+             data-input="true" type="text"/>
     </div>
+    <ul class="c-autocomplete__results" data-component="rw-autocomplete-suggestions"></ul>
   </div>
-  </body>
+  <div class="c-flight-info__details visually-hidden" data-component="flight-details">
+    <dl>
+      <dt class="c-flight-info__term  c-flight-info__detail c-flight-info__detail--size-l">Airport:</dt>
+      <dd class="c-flight-info__definition c-flight-info__detail c-flight-info__detail--size-l"
+          data-component="flight-detail_airport"></dd>
+
+      <dt class="c-flight-info__term c-flight-info__detail">Expected time:</dt>
+      <dd class="c-flight-info__definition c-flight-info__detail" data-component="flight-detail_expectedTime"></dd>
+
+      <dt class="c-flight-info__term c-flight-info__detail">Original time:</dt>
+      <dd class="c-flight-info__definition c-flight-info__detail" data-component="flight-detail_originalTime"></dd>
+
+      <dt class="c-flight-info__term c-flight-info__detail">Flight identifier:</dt>
+      <dd class="c-flight-info__definition c-flight-info__detail" data-component="flight-detail_flightIdentifier"></dd>
+
+      <dt class="c-flight-info__term c-flight-info__detail">Flight number</dt>
+      <dd class="c-flight-info__definition c-flight-info__detail" data-component="flight-detail_flightNumber"></dd>
+
+      <dt class="c-flight-info__term c-flight-info__detail">Score:</dt>
+      <dd class="c-flight-info__definition c-flight-info__detail" data-component="flight-detail_score"></dd>
+    </dl>
+  </div>
+</main>
+</body>
 </html>

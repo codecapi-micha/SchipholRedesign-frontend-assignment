@@ -31,15 +31,14 @@ module.exports = {
     devServer: {
         static: [
             {
-                directory: path.join(__dirname, 'server'),
+                directory: path.join(__dirname, 'src', 'server'),
                 publicPath: '/api',
-            },
-            {
-                directory: path.join(__dirname, 'dist'),
-                publicPath: '/',
             },
         ],
         hot: true,
     },
     mode: 'development',
+    resolve:{
+        extensions: ['.js', '.scss'],
+    },
 }

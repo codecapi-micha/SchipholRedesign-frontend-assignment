@@ -1,63 +1,106 @@
 import debounce from '../utils/debounce'
 import constrain from '../utils/constrain'
 
-function AutoComplete () {
-    this.container = null
-    this.itemContainer = null
-    this.timer = null
-    this.input = null
-    this.items = []
-    this.activeIndex = 0
-    this.keyPress = debounce(() => {
-        if (!this.input.value) {
-            this.items = []
+class AutoComplete {
+    static identifier = '[data-component="rw-autocomplete-element"]'
+
+    #container = null
+    #input = null
+    #items = []
+    #activeIndex = -1
+    #handlers = []
+
+    constructor(element) {
+        this.#container = element
+        this.#input = this.#container.querySelector('[data-input="true"]')
+        this.#input.addEventListener('keydown', event => this.#keyDown(event))
+        this.itemContainer = this.#container.querySelector('[data-component="rw-autocomplete-suggestions"]')
+    }
+
+    #search = debounce(() => {
+        if (this.#input.value === '') {
+            this.#clear()
             return
         }
-        fetch('/api/flights.json?query=' + this.input.value).then(console.log)
-        // serverMock(this.input.value).then(items => {
-        //     this.items = items
-        //     this.render()
-        // })
-        this.render()
+        const query = this.#input.value.toLowerCase()
+        fetch('/api/flights.json?query=' + query)
+            .then(response => response.json())
+            .then(({ flights }) => {
+                // temporary filtering and slicing on the client since we dont have a real server
+                return flights.filter(flight => flight.airport.toLowerCase().includes(query)).slice(0, 5)
+            }).then(flights => {
+                this.#items = flights
+                this.#setActiveIndex(-1)
+                this.#render()
+            })
     }, 200)
-    this.keyDown = ({keyCode}) => {
-        switch (keyCode) {
-        case 38:
-            this.setActiveIndex(this.activeIndex - 1)
+
+    #keyDown ({code}) {
+        switch (code) {
+        case 'ArrowLeft':
+        case 'ArrowRight':
             break
-        case 40:
-            this.setActiveIndex(this.activeIndex + 1)
+        case 'ArrowUp':
+            this.#setActiveIndex(this.#activeIndex - 1)
+            break
+        case 'ArrowDown':
+            this.#setActiveIndex(this.#activeIndex + 1)
+            break
+        case 'Enter':
+            if (this.#items.length === 0) {
+                return
+            }
+            this.#selectFlight(this.#items[this.#activeIndex])
+            break
+        default:
+            this.#search()
             break
         }
     }
-    this.setActiveIndex = index => {
-        this.activeIndex = constrain(index, 0, this.items.length - 1)
-        this.render()
-    }
-    this.clear = () => {
-        this.items = []
-        this.render()
+
+    #selectFlight (flight) {
+        this.#input.value = this.getFlightTemplate(flight)
+        this.#handlers.forEach(fn => fn(flight, this))
     }
 
-    this.render = () => {
-        const html = this.items.map((item, index) => {
-            return `<li>${index === this.activeIndex ? '.' : ''}${item.flightNumber}</li>`
+    #setActiveIndex (index) {
+        this.#activeIndex = constrain(index, 0, this.#items.length - 1)
+        this.#render()
+    }
+
+    #clear () {
+        this.#items = []
+        this.#setActiveIndex(-1)
+        this.#render()
+    }
+
+    onFlightSelected (fn) {
+        this.#handlers.push(fn)
+    }
+
+    getFlightTemplate (flight) {
+        const { flightNumber, airport, expectedTime } = flight
+        return `${flightNumber} - ${airport} (${expectedTime})`
+    }
+
+    #render () {
+        if (this.#items.length === 0 && this.#input.value !== '') {
+            this.#setItemContainerHTML('<em>No items found</em>')
+            return
+        }
+        const html = this.#items.map((flight, index) => {
+            const classes = ['c-autocomplete__suggestion']
+            if (index === this.#activeIndex) {
+                classes.push('c-autocomplete__suggestion--active')
+            }
+            return `<li class="${classes.join(' ')}">${this.getFlightTemplate(flight)}</li>`
         }).join('\n')
-        console.log(html)
+        this.#setItemContainerHTML(html)
+    }
+
+    #setItemContainerHTML (html) {
         this.itemContainer.innerHTML = html
     }
-
-    return this
-}
-
-AutoComplete.identifier = '[data-autocomplete]'
-AutoComplete.install = function (element) {
-    const autoComplete = new this()
-    autoComplete.container = element
-    autoComplete.input = autoComplete.container.querySelector('input[type="text"]')
-    autoComplete.input.addEventListener('keypress', event => autoComplete.keyPress(event))
-    autoComplete.input.addEventListener('keydown', event => autoComplete.keyDown(event))
-    autoComplete.itemContainer = autoComplete.container.querySelector('[data-autocomplete-suggestions]')
 }
 
 export { AutoComplete as default }
