@@ -1,5 +1,4 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const webpack = require('webpack')
 const path = require('path')
 
 module.exports = {
@@ -11,8 +10,7 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Custom templaaaate',
-            // Load a custom template (lodash by default)
+            title: 'Schiphol Flight Details',
             template: './src/index.html',
         }),
     ],
